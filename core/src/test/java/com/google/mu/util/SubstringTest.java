@@ -2,9 +2,11 @@ package com.google.mu.util;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.testing.ClassSanityTester;
 import com.google.common.testing.EqualsTester;
+import com.google.common.testing.NullPointerTester;
 
 import java.util.Optional;
 import org.junit.Test;
@@ -302,6 +304,51 @@ public class SubstringTest {
     assertThat(match.get().toString()).isEqualTo("bar");
   }
 
+  @Test public void regexGroup_noMatch() {
+    assertThat(Substring.regexGroup(".*x", 1).in("bar")).isEmpty();
+    assertThat(Substring.regexGroup("(.*x)", 1).in("bar")).isEmpty();
+    assertThat(Substring.regexGroup(".*(x)", 1).in("bar")).isEmpty();
+    assertThat(Substring.regexGroup(".*x", 1).in("")).isEmpty();
+  }
+
+  @Test public void regexGroup_matchesFirstGroup() {
+    Optional<Substring> match = Substring.regexGroup("(f.)b.*", 1).in("fobar");
+    assertThat(match.get().after()).isEqualTo("bar");
+    assertThat(match.get().remove()).isEqualTo("bar");
+    assertThat(match.get().replaceWith('c')).isEqualTo("cbar");
+    assertThat(match.get().replaceWith("car")).isEqualTo("carbar");
+    assertThat(match.get().index()).isEqualTo(0);
+    assertThat(match.get().length()).isEqualTo(2);
+    assertThat(match.get().toString()).isEqualTo("fo");
+  }
+
+  @Test public void regexGroup_matchesSecondGroup() {
+    Optional<Substring> match = Substring.regexGroup("f(o.)(ba.)", 2).in("foobarbaz");
+    assertThat(match.get().after()).isEqualTo("baz");
+    assertThat(match.get().remove()).isEqualTo("foobaz");
+    assertThat(match.get().replaceWith('c')).isEqualTo("foocbaz");
+    assertThat(match.get().replaceWith("car")).isEqualTo("foocarbaz");
+    assertThat(match.get().index()).isEqualTo(3);
+    assertThat(match.get().length()).isEqualTo(3);
+    assertThat(match.get().toString()).isEqualTo("bar");
+  }
+
+  @Test public void regexGroup_group0() {
+    Optional<Substring> match = Substring.regexGroup("f(o.)(ba.).*", 0).in("foobarbaz");
+    assertThat(match.get().after()).isEmpty();
+    assertThat(match.get().remove()).isEmpty();
+    assertThat(match.get().replaceWith('c')).isEqualTo("c");
+    assertThat(match.get().replaceWith("car")).isEqualTo("car");
+    assertThat(match.get().index()).isEqualTo(0);
+    assertThat(match.get().length()).isEqualTo(9);
+    assertThat(match.get().toString()).isEqualTo("foobarbaz");
+  }
+
+  @Test public void regexGroup_invalidGroupIndex() {
+    Substring.Pattern pattern = Substring.regexGroup("f(o.)(ba.)", 3);
+    assertThrows(IndexOutOfBoundsException.class, () -> pattern.in("foobarbaz"));
+  }
+
   @Test public void lastSnippet_noMatch() {
     assertThat(Substring.last("foo").in("bar")).isEmpty();
     assertThat(Substring.last("foo").in("")).isEmpty();
@@ -565,6 +612,7 @@ public class SubstringTest {
   }
 
   @Test public void testNulls() throws Exception {
+    new NullPointerTester().testAllPublicInstanceMethods(Substring.all().in("foobar").get());
     new ClassSanityTester().testNulls(Substring.class);
     new ClassSanityTester().forAllPublicStaticMethods(Substring.class).testNulls();
   }

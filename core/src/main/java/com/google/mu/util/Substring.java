@@ -97,20 +97,27 @@ public final class Substring {
     return (SerializablePattern) str -> substring(str, str.indexOf(snippet), snippet.length());
   }
 
-  /** Returns a {@code Pattern} that matches the first occurrence of {@code regexPattern}. */
+  /**
+   * Returns a {@code Pattern} that matches the first occurrence of {@code regexPattern}.
+   *
+   * <p>Note that unlike {@code str.replaceFirst(regexPattern, replacement)},
+   * {@code regex(regexPattern).replaceFrom(str, replacement)} treats the {@code replacement} as literal
+   * string with no special handling of backslash (\) and dollar sign ($).
+   */
   public static Pattern regex(java.util.regex.Pattern regexPattern) {
-    requireNonNull(regexPattern);
-    return (SerializablePattern) str -> {
-      java.util.regex.Matcher matcher = regexPattern.matcher(str);
-      if (matcher.find()) {
-        return Optional.of(new Substring(str, matcher.start(), matcher.end()));
-      } else {
-        return Optional.empty();
-      }
-    };
+    return regexGroup(regexPattern, 0);
   }
 
-  /** Returns a {@code Pattern} that matches the first occurrence of {@code regexPattern}. */
+  /**
+   * Returns a {@code Pattern} that matches the first occurrence of {@code regexPattern}.
+   *
+   * <p>Note that unlike {@code str.replaceFirst(regexPattern, replacement)},
+   * {@code regex(regexPattern).replaceFrom(str, replacement)} treats the {@code replacement} as literal
+   * string with no special handling of backslash (\) and dollar sign ($).
+   *
+   * <p>Because this method internally compiles {@code regexPattern}, it's more efficient to reuse the
+   * returned {@link Pattern} object than calling {@code regex(regexPattern)} repetitively.
+   */
   public static Pattern regex(String regexPattern) {
     return regex(java.util.regex.Pattern.compile(regexPattern));
   }
@@ -123,6 +130,7 @@ public final class Substring {
    */
   public static Pattern regexGroup(java.util.regex.Pattern regexPattern, int group) {
     requireNonNull(regexPattern);
+    if (group < 0) throw new IllegalArgumentException("group cannot be negative: " + group);
     return (SerializablePattern) str -> {
       java.util.regex.Matcher matcher = regexPattern.matcher(str);
       if (matcher.find()) {

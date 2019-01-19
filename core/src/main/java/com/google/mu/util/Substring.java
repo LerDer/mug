@@ -145,7 +145,7 @@ public final class Substring {
    * Returns a {@code Pattern} that matches capturing {@code group} of {@code regexPattern}.
    *
    * <p>Unlike {@code str.replaceFirst(regexPattern, replacement)},
-   * <pre>regexGroup(regexPattern, group).replaceFrom(str, replacement)</pre> treats the {@code replacement}
+   * <pre class="code">regexGroup(regexPattern, group).replaceFrom(str, replacement)</pre> treats the {@code replacement}
    * as a literal string with no special handling of backslash (\) and dollar sign ($) characters.
    *
    * <p>Because this method internally compiles {@code regexPattern}, it's more efficient to reuse the

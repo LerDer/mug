@@ -200,12 +200,12 @@ public final class Substring {
    * enclosing string.
    */
   Substring andBefore() {
-	  return new Substring(context, 0, endIndex);
+    return new Substring(context, 0, endIndex);
   }
 
   /** Returns a new {@code Substring} instance that extends to the end of the enclosing string. */
   Substring andAfter() {
-	  return new Substring(context, startIndex, context.length());
+    return new Substring(context, startIndex, context.length());
   }
 
   /** Returns a new string with the substring removed. */
@@ -295,15 +295,15 @@ public final class Substring {
      */
     default Pattern or(Pattern that) {
       requireNonNull(that);
-      return str -> {
+      return (SerializablePattern) str -> {
         Optional<Substring> substring = in(str);
         return substring.isPresent() ? substring : that.in(str);
       };
     }
 
     /**
-     * Returns a new {@code Pattern} that will match strings using {@code this} and then extend
-     * the match to the beginning of the string. For example: <pre>
+     * Returns a new {@code Pattern} that will match strings using {@code this} pattern and then
+     * extend the matched substring to the beginning of the string. For example: <pre>
      * String schemeStripped = Substring.first("://").andBefore().removeFrom(uri);
      * </pre>
      */
@@ -312,8 +312,8 @@ public final class Substring {
     }
 
     /**
-     * Returns a new {@code Pattern} that will match strings using {@code this} and then extend
-     * the match to the end of the string. For example: <pre>
+     * Returns a new {@code Pattern} that will match strings using {@code this} pattern and then
+     * extend the matched substring to the end of the string. For example: <pre>
      * String commentRemoved = Substring.first("//").andAfter().removeFrom(line);
      * </pre>
      */
